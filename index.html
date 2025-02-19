@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Проверка сертификата</title>
+    <style>
+        body { max-width: 600px; margin: 20px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h2>Проверка сертификата</h2>
+    <div class="form-group">
+        <label>Фамилия:</label>
+        <input type="text" id="lastName" required>
+    </div>
+    <div class="form-group">
+        <label>Имя:</label>
+        <input type="text" id="firstName" required>
+    </div>
+    <div class="form-group">
+        <label>Отчество:</label>
+        <input type="text" id="middleName">
+    </div>
+    <div class="form-group">
+        <label>Номер сертификата:</label>
+        <input type="text" id="certNumber" required>
+    </div>
+    <div class="form-group">
+        <label>Название курса:</label>
+        <input type="text" id="courseName" required>
+    </div>
+    <button onclick="checkCertificate()">Проверить</button>
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <script>
+        const SCRIPT_URL = 'ВАШ_URL_СКРИПТА';
+
+        async function checkCertificate() {
+            const data = {
+                lastName: document.getElementById('lastName').value,
+                firstName: document.getElementById('firstName').value,
+                middleName: document.getElementById('middleName').value,
+                certNumber: document.getElementById('certNumber').value,
+                courseName: document.getElementById('courseName').value
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                document.getElementById('result').textContent = result.result;
+                document.getElementById('result').style.color = result.result.includes('подтверждён') ? 'green' : 'red';
+            } catch (error) {
+                document.getElementById('result').textContent = 'Ошибка подключения';
+                document.getElementById('result').style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
