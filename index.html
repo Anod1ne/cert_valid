@@ -1,93 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Проверка сертификата</title>
     <style>
-        body { 
-            max-width: 600px; 
-            margin: 20px auto; 
-            padding: 20px;
-            font-family: Arial, sans-serif;
+        :root {
+            --primary: #2196F3;
+            --error: #f44336;
+            --success: #4CAF50;
+            --transition: 0.3s ease;
         }
-        .form-group { 
-            margin-bottom: 15px; 
+
+        body {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            font-family: 'Segoe UI', system-ui;
         }
-        label { 
-            display: block; 
-            margin-bottom: 5px;
-            font-weight: bold; 
+
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-        input { 
-            width: 100%; 
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
         }
-        button { 
-            padding: 10px 20px; 
-            background: #007bff; 
-            color: white; 
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 1rem;
+            transition: 
+                filter var(--transition),
+                transform 0.1s ease;
         }
+
         button:hover {
-            background: #0056b3;
+            filter: brightness(1.1);
         }
-        #result {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
+
+        button:active {
+            transform: scale(0.98);
         }
+
         #loader {
             display: none;
-            margin: 10px 0;
-            color: #007bff;
+            margin: 1.5rem 0;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        #result {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: var(--success);
+            border: 2px solid #c8e6c9;
+        }
+
+        .error {
+            background: #ffebee;
+            color: var(--error);
+            border: 2px solid #ffcdd2;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 <body>
-    <h2>Проверка сертификата</h2>
+    <h1 style="text-align: center; color: #2c3e50;">Проверка сертификата</h1>
+    
     <div class="form-group">
-        <label>Фамилия:</label>
+        <label for="lastName">Фамилия</label>
         <input type="text" id="lastName" required>
     </div>
+
     <div class="form-group">
-        <label>Имя:</label>
+        <label for="firstName">Имя</label>
         <input type="text" id="firstName" required>
     </div>
+
     <div class="form-group">
-        <label>Отчество:</label>
+        <label for="middleName">Отчество</label>
         <input type="text" id="middleName">
     </div>
+
     <div class="form-group">
-        <label>Номер сертификата:</label>
+        <label for="certNumber">Номер сертификата</label>
         <input type="text" id="certNumber" required>
     </div>
+
     <div class="form-group">
-        <label>Название курса:</label>
+        <label for="courseName">Название курса</label>
         <input type="text" id="courseName" required>
     </div>
-    
+
     <button onclick="checkCertificate()">Проверить</button>
-    <div id="loader">Проверяем...</div>
+    <div id="loader">
+        <div class="spinner"></div>
+        Проверяем данные...
+    </div>
     <div id="result"></div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhsg_v09OkmsFcbXzU1_G0S3vmCq5y1L4TrY5QrvF1LQmP31bEccH1Vb8OUOM6oKDf/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDZPDQ2Vh3gYi1DA0YLllQy2g4BvzUy3vSbofeaks0CBrl7sAIUldTisAaBt_4lv4B/exec'; // Замените на реальный URL
 
         async function checkCertificate() {
             const loader = document.getElementById('loader');
             const resultDiv = document.getElementById('result');
             
             try {
-                // Показываем лоадер
+                // Сброс состояния
+                resultDiv.className = '';
                 loader.style.display = 'block';
                 resultDiv.textContent = '';
 
-                // Собираем данные
-                const data = {
+                // Сбор данных
+                const formData = {
                     lastName: document.getElementById('lastName').value.trim(),
                     firstName: document.getElementById('firstName').value.trim(),
                     middleName: document.getElementById('middleName').value.trim(),
@@ -95,30 +164,36 @@
                     courseName: document.getElementById('courseName').value.trim()
                 };
 
-                // Валидация обязательных полей
-                if (!data.lastName || !data.firstName || !data.certNumber || !data.courseName) {
-                    throw new Error('Заполните все обязательные поля!');
+                // Валидация
+                const required = ['lastName', 'firstName', 'certNumber', 'courseName'];
+                const missing = required.filter(field => !formData[field]);
+                if (missing.length > 0) {
+                    throw new Error(`Заполните обязательные поля: ${missing.join(', ')}`);
                 }
 
-                // Отправляем запрос
+                // Отправка запроса
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
                 });
 
-                if (!response.ok) throw new Error('Ошибка сервера');
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера (${response.status})`);
+                }
+
+                const data = await response.json();
                 
-                const result = await response.json();
-                
-                resultDiv.textContent = result.result;
-                resultDiv.style.color = result.result.includes('подтверждён') ? 'green' : 'red';
+                // Обработка ответа
+                resultDiv.textContent = data.result;
+                resultDiv.className = data.result.includes('подтверждён') ? 'success' : 'error';
 
             } catch (error) {
+                // Обработка ошибок
                 resultDiv.textContent = error.message;
-                resultDiv.style.color = 'red';
+                resultDiv.className = 'error';
+                console.error('Ошибка:', error);
+                
             } finally {
                 loader.style.display = 'none';
             }
