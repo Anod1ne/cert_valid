@@ -1,215 +1,185 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Проверка сертификата</title>
   <style>
-    :root {
-      --primary: #2196F3;
-      --error: #f44336;
-      --success: #4CAF50;
-      --transition: 0.3s ease;
-    }
     body {
       max-width: 600px;
       margin: 2rem auto;
+      font-family: sans-serif;
       padding: 0 1rem;
-      font-family: 'Segoe UI', system-ui;
+    }
+    h1 {
+      text-align: center;
     }
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
     label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       font-weight: 600;
-      color: #2c3e50;
     }
     input {
       width: 100%;
-      padding: 0.8rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
+      padding: 0.5rem;
       font-size: 1rem;
-      transition: border-color var(--transition);
-    }
-    input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
-      background: var(--primary);
-      color: white;
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      background: #2196F3;
+      color: #fff;
+      padding: 0.8rem 1.5rem;
       font-size: 1rem;
-      transition: 
-        filter var(--transition),
-        transform 0.1s ease;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
     button:hover {
-      filter: brightness(1.1);
-    }
-    button:active {
-      transform: scale(0.98);
-    }
-    #loader {
-      display: none;
-      margin: 1.5rem 0;
-      text-align: center;
-      color: var(--primary);
+      background: #1976d2;
     }
     #result {
+      margin-top: 1rem;
       padding: 1rem;
-      border-radius: 8px;
-      margin-top: 1.5rem;
+      border-radius: 6px;
       font-weight: 500;
     }
     .success {
       background: #e8f5e9;
-      color: var(--success);
-      border: 2px solid #c8e6c9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
     }
     .error {
       background: #ffebee;
-      color: var(--error);
-      border: 2px solid #ffcdd2;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .spinner {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(0,0,0,0.1);
-      border-left-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center; color: #2c3e50;">Проверка сертификата</h1>
+  <h1>Проверка сертификата</h1>
   
   <div class="form-group">
     <label for="lastName">Фамилия</label>
-    <input type="text" id="lastName" required>
+    <input type="text" id="lastName" />
   </div>
-
+  
   <div class="form-group">
     <label for="firstName">Имя</label>
-    <input type="text" id="firstName" required>
+    <input type="text" id="firstName" />
   </div>
-
+  
   <div class="form-group">
     <label for="middleName">Отчество</label>
-    <input type="text" id="middleName">
+    <input type="text" id="middleName" />
   </div>
-
+  
   <div class="form-group">
     <label for="certNumber">Номер сертификата</label>
-    <input type="text" id="certNumber" required>
+    <input type="text" id="certNumber" />
   </div>
-
+  
   <div class="form-group">
     <label for="courseName">Название курса</label>
-    <input type="text" id="courseName" required>
+    <input type="text" id="courseName" />
   </div>
-
+  
   <button onclick="checkCertificate()">Проверить</button>
-  <div id="loader">
-    <div class="spinner"></div>
-    Проверяем данные...
-  </div>
+  
   <div id="result"></div>
-
+  
   <script>
-    // Замените на реальный URL вашего веб-приложения Google Apps Script
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6uqlPDm6jndM7kBaiNyl4EDpRbcXKnM9m4m9dWBegO683U9RUY_zPVMGA3TQ4rZLh/exec';
+    // Вставьте сюда URL, который вы получили при деплое Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfTh516VZAVCP1XRheyBijQAYosOJEl2kVNfZqEjXJOb41VHw1XvkzoI9HoRQYq9WT/exec';
 
-    /**
-     * Выполняет JSONP-запрос, динамически добавляя <script>-тег.
-     * @param {string} url - базовый URL запроса.
-     * @param {object} params - объект с параметрами запроса.
-     * @param {number} [timeout=10000] - время ожидания ответа в мс.
-     * @returns {Promise} - Promise, который разрешается полученными данными.
-     */
-    function jsonpRequest(url, params, timeout = 10000) {
+    // Функция для отправки JSONP-запроса
+    function jsonpRequest(params) {
       return new Promise((resolve, reject) => {
-        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        // Генерируем уникальное имя callback-функции
+        const callbackName = 'jsonp_cb_' + Math.round(Math.random() * 1e8);
+
+        // Добавляем в параметры запроса имя callback
         params.callback = callbackName;
+        
+        // Формируем URL с query-параметрами
         const queryString = new URLSearchParams(params).toString();
+        const url = `${SCRIPT_URL}?${queryString}`;
+
+        // Создаём <script> для загрузки
         const script = document.createElement('script');
-        script.src = `${url}?${queryString}`;
+        script.src = url;
         script.onerror = () => {
           reject(new Error('JSONP request failed'));
           cleanup();
         };
-        document.body.appendChild(script);
-        const timer = setTimeout(() => {
-          reject(new Error('JSONP request timeout'));
-          cleanup();
-        }, timeout);
+
+        // Определяем функцию обратного вызова в глобальном объекте window
         window[callbackName] = (data) => {
-          clearTimeout(timer);
           resolve(data);
           cleanup();
         };
+
         function cleanup() {
-          if(window[callbackName]) {
-            delete window[callbackName];
-          }
-          if(script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
+          delete window[callbackName];
+          document.body.removeChild(script);
         }
+
+        document.body.appendChild(script);
       });
     }
 
     async function checkCertificate() {
-      const loader = document.getElementById('loader');
       const resultDiv = document.getElementById('result');
-      
-      // Сброс состояния
-      resultDiv.className = '';
       resultDiv.textContent = '';
-      loader.style.display = 'block';
+      resultDiv.className = '';
 
-      // Сбор данных формы
-      const formData = {
-        lastName: document.getElementById('lastName').value.trim(),
-        firstName: document.getElementById('firstName').value.trim(),
-        middleName: document.getElementById('middleName').value.trim(),
-        certNumber: document.getElementById('certNumber').value.trim(),
-        courseName: document.getElementById('courseName').value.trim()
+      // Считываем значения из полей
+      const lastName = document.getElementById('lastName').value.trim();
+      const firstName = document.getElementById('firstName').value.trim();
+      const middleName = document.getElementById('middleName').value.trim();
+      const certNumber = document.getElementById('certNumber').value.trim();
+      const courseName = document.getElementById('courseName').value.trim();
+
+      // Формируем объект параметров
+      const params = {
+        lastName,
+        firstName,
+        middleName,
+        certNumber,
+        courseName
       };
 
       // Валидация обязательных полей
       const required = ['lastName', 'firstName', 'certNumber', 'courseName'];
-      const missing = required.filter(field => !formData[field]);
+      const missing = required.filter(field => !params[field]);
       if (missing.length > 0) {
-        loader.style.display = 'none';
-        resultDiv.textContent = `Заполните обязательные поля: ${missing.join(', ')}`;
+        resultDiv.textContent = 'Заполните обязательные поля: ' + missing.join(', ');
         resultDiv.className = 'error';
         return;
       }
 
       try {
-        // Выполняем JSONP-запрос
-        const data = await jsonpRequest(SCRIPT_URL, formData);
-        resultDiv.textContent = data.result;
-        resultDiv.className = data.result.includes('подтверждён') ? 'success' : 'error';
+        // Отправляем запрос
+        const data = await jsonpRequest(params);
+
+        // Обрабатываем ответ
+        if (data.result) {
+          resultDiv.textContent = data.result;
+          // Считаем, что «найден» — это success, всё остальное — error
+          if (data.result.includes('найден')) {
+            resultDiv.className = 'success';
+          } else {
+            resultDiv.className = 'error';
+          }
+        } else {
+          resultDiv.textContent = 'Некорректный ответ сервера';
+          resultDiv.className = 'error';
+        }
       } catch (error) {
         resultDiv.textContent = error.message;
         resultDiv.className = 'error';
-        console.error('Ошибка:', error);
-      } finally {
-        loader.style.display = 'none';
       }
     }
   </script>
